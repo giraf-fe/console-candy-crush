@@ -94,6 +94,7 @@ public class CandyCrush {
 
             if(row > boardsize || row < 1 || col > boardsize || col < 1) {
                 println("Input is out of range. Select a number on the board.");
+                continue;
             }
             
             int direction;
@@ -127,7 +128,7 @@ public class CandyCrush {
             if(solves.length == 0){
                 swapPieces(gameBoard, row-1, col-1, dirlut[direction-1]);
                 println("Swap does not create a match!");
-                break;
+                continue;
             }
 
             score += removeSolved(gameBoard, solves);
