@@ -3,7 +3,9 @@ package CandyCrush;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
+
 
 import CandyCrush.Solve.Axis;
 
@@ -19,9 +21,173 @@ public class CandyCrush {
     protected void finalize() {
         this.s.close();
     }
+    
+    public void StartGame(int boardsize) {
+        
+        while(true){
+            //input loop here
+            String q;
+            while(true){
+                println("Welcome to Candy Crush!\n"+
+                        "1: Start Game\n"+
+                        "2: Rules\n"+
+                        "Anything else: Exit");
 
-    public void StartGame() {
-        String[][] gameBoard = new String[10][10];
+                try {
+                    q = this.s.nextLine();
+                } catch (NoSuchElementException e) {
+                    println("Input is invalid, please try again.");
+                    continue;
+                }
+                break;
+            }//nah
+            
+            if(q.equals("1")){
+                InternalStartGame(boardsize);
+            } else if(q.equals("2")){
+                println("The goal of Candy Crush is simple: you need to match 3+ candies in a row (vertically or horizontally) to gain points."+
+                        " Your goal is to make as many points as you can. Points go by how many candies in a row you match. Ex: 3 in a row = 3 points.");
+            } else{
+                break;
+            }
+        }
+    }
+
+
+    private void InternalStartGame(int boardsize){
+        String[][] gameBoard = new String[boardsize][boardsize];
+        //keep generating gameBoard until it is not solved
+        String[] pieces =  new String[] { 
+            ANSIColors.ANSI_RED + "@" + ANSIColors.ANSI_RESET,
+            ANSIColors.ANSI_BLUE + "#" + ANSIColors.ANSI_RESET,
+            ANSIColors.ANSI_YELLOW + "$" + ANSIColors.ANSI_RESET,
+            ANSIColors.ANSI_GREEN + "%" + ANSIColors.ANSI_RESET,
+            ANSIColors.ANSI_PURPLE + "&" + ANSIColors.ANSI_RESET
+        };
+        fillRandom(pieces, gameBoard);
+        while(true){
+            Solve[] solves = findSolves(gameBoard);
+            if(solves.length == 0) break;
+
+            removeSolved(gameBoard, solves);
+            repopulateEmpty(gameBoard, pieces);
+        } 
+        
+        int score = 0;
+        while(true){
+            println(getBoardString(gameBoard, true));
+            println("Current score: " + score);
+            print("Select a square (row col) or 0 0 for exit: ");
+            int row, col;
+            try {
+                row = s.nextInt(); 
+                col = s.nextInt();  
+            } catch (NumberFormatException e) {
+                println("Bad input. Try again with integers.");
+                continue;
+            }
+
+            if(row == 0 && col == 0) {
+                println("You reached a score of " + score + ".");
+                break;
+            }
+
+            if(row > boardsize || row < 1 || col > boardsize || col < 1) {
+                println("Input is out of range. Select a number on the board.");
+            }
+            
+            int direction;
+            while(true) {
+                print("In which direction would you like to swap?\n"+
+                         "1: up\n"+
+                         "2: down\n"+
+                         "3: left\n"+
+                         "4: right\n"+
+                         "direction: ");
+                try {
+                    direction = s.nextInt();
+                } catch (NumberFormatException e) {
+                    println("Bad input. Try again with integers.");
+                    continue;
+                }
+                if(direction > 4 || direction < 1) {
+                    println("Input is out of range. Pick a valid direction.");
+                }
+                break;
+            }
+
+            Direction[] dirlut = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT};
+
+            swapPieces(gameBoard, row-1, col-1, dirlut[direction-1]);
+
+            println(getBoardString(gameBoard, false));
+
+            Solve[] solves = findSolves(gameBoard);
+
+            if(solves.length == 0){
+                swapPieces(gameBoard, row-1, col-1, dirlut[direction-1]);
+                println("Swap does not create a match!");
+                break;
+            }
+
+            score += removeSolved(gameBoard, solves);
+
+            //animate gravity lol
+            String[][][] animate = gravityDown(gameBoard);
+            for(int i = 0; i < animate.length; i++){
+                String[][] frame = new String[animate[0].length][animate[0][0].length];
+                for(int j = 0; j < animate[i].length; j++){
+                    for(int k = 0; k < animate[i][j].length; k++){
+                        frame[j][k] = animate[i][j][k];
+                    }
+                }
+                Sleep(800);
+                println(getBoardString(frame, false));
+            }
+            Sleep(800);
+
+            println("Repopulating empty spots...\n");
+
+            repopulateEmpty(gameBoard, pieces);
+
+            println(getBoardString(gameBoard, false));
+
+            //check for combo
+            int combonum = 1;
+            while(true) {
+                solves = findSolves(gameBoard);
+                if(solves.length == 0) break;
+
+                println("Combo! x" + combonum + "\n");
+                combonum++;
+
+                score += removeSolved(gameBoard, solves);
+
+                //animate gravity lol
+                animate = gravityDown(gameBoard);
+                for(int i = 0; i < animate.length; i++){
+                    String[][] frame = new String[animate[0].length][animate[0][0].length];
+                    for(int j = 0; j < animate[i].length; j++){
+                        for(int k = 0; k < animate[i][j].length; k++){
+                            frame[j][k] = animate[i][j][k];
+                        }
+                    }
+                    Sleep(800);
+                    println(getBoardString(frame, false));
+                }
+                Sleep(800);
+
+                println("Repopulating empty spots...");
+
+                repopulateEmpty(gameBoard, pieces);
+            }
+            //combo end
+
+        }
+    }
+
+    public void Demo() {
+        String[][] gameBoard = new String[6][6]; 
         fillRandom(new String[]{
             ANSIColors.ANSI_RED + "@" + ANSIColors.ANSI_RESET,
             ANSIColors.ANSI_BLUE + "#" + ANSIColors.ANSI_RESET,
@@ -30,18 +196,18 @@ public class CandyCrush {
             ANSIColors.ANSI_PURPLE + "&" + ANSIColors.ANSI_RESET
         }, gameBoard);
 
-        println(getBoardString(gameBoard));
+        println(getBoardString(gameBoard, false));
         Solve[] solves = findSolves(gameBoard);
         for (int i = 0; i < solves.length; i++) {
             println(solves[i]);
         }
         int points = removeSolved(gameBoard, solves);
 
-        println(getBoardString(gameBoard));
+        println(getBoardString(gameBoard, false));
         println("Points: " + points);
         String[][][] animate = gravityDown(gameBoard);
         println("After gravity: ");
-        println(getBoardString(gameBoard));
+        println(getBoardString(gameBoard, false));
         
         for(int i = 0; i < animate.length; i++){
             String[][] frame = new String[animate[0].length][animate[0][0].length];
@@ -51,7 +217,7 @@ public class CandyCrush {
                 }
             }
             println("Frame " + i + ":");
-            println(getBoardString(frame));
+            println(getBoardString(frame, false));
         }
     }
 
@@ -147,7 +313,7 @@ public class CandyCrush {
                 }
                 if (j == board[i].length-1) {
                     if (matchCount >= 3) {// solve found, identical as above
-                        temp.endIdx = j - 1;
+                        temp.endIdx = j;
                         solves.add(new Solve(temp));
                     }
                     temp.beginIdx = j;
@@ -170,7 +336,7 @@ public class CandyCrush {
                     matchCount++;
                 } else {
                     if (matchCount >= 3) {// solve found
-                        temp.endIdx = j - 1;
+                        temp.endIdx = j-1;
                         solves.add(new Solve(temp));
                     }
                     temp.beginIdx = j;
@@ -179,7 +345,7 @@ public class CandyCrush {
                 }
                 if (j == board.length-1) {
                     if (matchCount >= 3) {// solve found, identical as above
-                        temp.endIdx = j - 1;
+                        temp.endIdx = j;
                         solves.add(new Solve(temp));
                     }
                     temp.beginIdx = j;
@@ -249,15 +415,33 @@ public class CandyCrush {
     }
 
     //returns a string form of a board
-    private String getBoardString(String[][] board) {
-        String s = "";
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                s += board[i][j] + " ";
+    private String getBoardString(String[][] board, boolean numbers) {
+        if(numbers) {
+            String s = "";
+            for (int i = 0; i < board.length; i++) {
+                for (int j = 0; j < board[i].length; j++) {
+                    s += board[i][j] + " ";
+                }
+                s += "  " + (i+1) + "\n";
             }
             s += "\n";
+            for(int i = 0; i < board.length; i++) {
+                s += (i+1) + " ";
+            }
+            return s + "\n";
         }
-        return s;
+        else
+        {
+            String s = "";
+            for (int i = 0; i < board.length; i++) {
+                for (int j = 0; j < board[i].length; j++) {
+                    s += board[i][j] + " ";
+                }
+                s += "\n";
+            }
+            return s; 
+        }
+        
     }
 
     //these are here because i am too lazy to type out system.out.println
@@ -269,5 +453,14 @@ public class CandyCrush {
     //local println method
     private <T> void println(T a) {
         this.pStream.println(a);
+    }
+
+    //sleep method with proper error check
+    private void Sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            println("Thread interrupted! Leaving sleep state...");
+        }
     }
 }
