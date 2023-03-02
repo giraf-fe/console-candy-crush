@@ -45,6 +45,7 @@ public class CandyCrush {
             
             if(q.equals("1")){
                 InternalStartGame(boardsize);
+                s.nextLine();
             } else if(q.equals("2")){
                 println("The goal of Candy Crush is simple: you need to match 3+ candies in a row (vertically or horizontally) to gain points."+
                         " Your goal is to make as many points as you can. Points go by how many candies in a row you match. Ex: 3 in a row = 3 points.");
@@ -86,6 +87,8 @@ public class CandyCrush {
                 col = s.nextInt();  
             } catch (InputMismatchException e) {
                 println("Bad input. Try again with integers.");
+                Sleep(1500);
+                s.nextInt();
                 continue;
             }
 
@@ -111,6 +114,8 @@ public class CandyCrush {
                     direction = s.nextInt();
                 } catch (InputMismatchException e) {
                     println("Bad input. Try again with integers.");
+                    Sleep(2000);
+                    s.nextLine();
                     continue;
                 }
                 if(direction > 4 || direction < 1) {
@@ -121,7 +126,13 @@ public class CandyCrush {
 
             Direction[] dirlut = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT};
 
-            swapPieces(gameBoard, row-1, col-1, dirlut[direction-1]);
+            try {
+                swapPieces(gameBoard, row-1, col-1, dirlut[direction-1]);
+            } catch (RuntimeException e) {
+                println("You are swapping to outside of the board.");
+                Sleep(1500);
+                continue;
+            }
 
             ClearConsole();
             println(getBoardString(gameBoard, false));
@@ -163,6 +174,7 @@ public class CandyCrush {
             repopulateEmpty(gameBoard, pieces);
             ClearConsole();
             println(getBoardString(gameBoard, false));
+            Sleep(800);
 
             //check for combo
             int combonum = 1;
@@ -193,6 +205,10 @@ public class CandyCrush {
                 println("Repopulating empty spots...");
 
                 repopulateEmpty(gameBoard, pieces);
+
+                ClearConsole();
+                println(getBoardString(gameBoard, false));
+                Sleep(800);
             }
             //combo end
 
