@@ -1,4 +1,4 @@
-import CandyCrush.CandyCrush;
+import CandyCrush.*;
 
 public class Start {
     public static void main(String[] args) {
