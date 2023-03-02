@@ -3,6 +3,7 @@ package CandyCrush;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -83,7 +84,7 @@ public class CandyCrush {
             try {
                 row = s.nextInt(); 
                 col = s.nextInt();  
-            } catch (NumberFormatException e) {
+            } catch (InputMismatchException e) {
                 println("Bad input. Try again with integers.");
                 continue;
             }
@@ -108,7 +109,7 @@ public class CandyCrush {
                          "direction: ");
                 try {
                     direction = s.nextInt();
-                } catch (NumberFormatException e) {
+                } catch (InputMismatchException e) {
                     println("Bad input. Try again with integers.");
                     continue;
                 }
