@@ -75,6 +75,7 @@ public class CandyCrush {
         
         int score = 0;
         while(true){
+            ClearConsole();
             println(getBoardString(gameBoard, true));
             println("Current score: " + score);
             print("Select a square (row col) or 0 0 for exit: ");
@@ -121,17 +122,24 @@ public class CandyCrush {
 
             swapPieces(gameBoard, row-1, col-1, dirlut[direction-1]);
 
+            ClearConsole();
             println(getBoardString(gameBoard, false));
+            Sleep(800);
 
             Solve[] solves = findSolves(gameBoard);
 
             if(solves.length == 0){
                 swapPieces(gameBoard, row-1, col-1, dirlut[direction-1]);
                 println("Swap does not create a match!");
+                Sleep(800);
                 continue;
             }
 
             score += removeSolved(gameBoard, solves);
+
+            ClearConsole();
+            println(getBoardString(gameBoard, false));
+            Sleep(800);
 
             //animate gravity lol
             String[][][] animate = gravityDown(gameBoard);
@@ -143,14 +151,16 @@ public class CandyCrush {
                     }
                 }
                 Sleep(800);
+                ClearConsole();
                 println(getBoardString(frame, false));
             }
-            Sleep(800);
+            
 
             println("Repopulating empty spots...\n");
+            Sleep(800);
 
             repopulateEmpty(gameBoard, pieces);
-
+            ClearConsole();
             println(getBoardString(gameBoard, false));
 
             //check for combo
@@ -174,6 +184,7 @@ public class CandyCrush {
                         }
                     }
                     Sleep(800);
+                    ClearConsole();
                     println(getBoardString(frame, false));
                 }
                 Sleep(800);
@@ -463,5 +474,11 @@ public class CandyCrush {
         } catch (InterruptedException e) {
             println("Thread interrupted! Leaving sleep state...");
         }
+    }
+
+    //clear
+    private void ClearConsole() {
+        print("\033[H\033[2J");
+        this.pStream.flush();
     }
 }
