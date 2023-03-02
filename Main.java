@@ -1,6 +1,6 @@
 import CandyCrush.*;
 
-public class Start {
+public class Main {
     public static void main(String[] args) {
         new CandyCrush(System.in, System.out).StartGame();
     }

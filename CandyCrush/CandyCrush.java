@@ -21,7 +21,7 @@ public class CandyCrush {
     }
 
     public void StartGame() {
-        String[][] gameBoard = new String[7][7];
+        String[][] gameBoard = new String[10][10];
         fillRandom(new String[]{
             ANSIColors.ANSI_RED + "@" + ANSIColors.ANSI_RESET,
             ANSIColors.ANSI_BLUE + "#" + ANSIColors.ANSI_RESET,
